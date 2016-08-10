@@ -14,11 +14,11 @@ import time
 # create object
 k = Kraken()
 rates={}
-bank = 10
+bank = 20
 run = 0
 
 # aget API keys
-# k.get_keys('C:\\test.txt')
+k.get_keys('C:\\test.txt')
 
 # list of currencies and empty rates/trades table
 currency = [i for i in k.get_asset_info().json()['result']]
@@ -70,7 +70,63 @@ def run_sim():
 
     print('\nThe 3-way arbitrage with highest opportunity is: ', high)
     print('Possible profit is:', (prof))
-    print('% gain or loss is: ', (perct))
+    print('% gain or loss is: ', (perct))    
+    
+    #trade functionality
+    if perct>5:
+        print('go for it')
+    
+    
+    #example for opposite market - buy / quote price
+    #trade1= k.add_standard_order('XXBTZUSD','buy','market','20.00', oflags='viqc')
+    
+    #example for market - sell / base price
+    #trade2 = k.add_standard_order('XXBTZUSD','sell','market',balance)
+    
+    #balance = k.get_account_balance().json()['result']['XXBT']
+    
+    #get trade pairs to determine type of trade     
+    t1_pair = ''.join(high[0:2])
+    t2_pair = ''.join(high[1:])
+    t3_pair = ''.join(high[-1::-2])
+    tpairs = [t1_pair,t2_pair,t3_pair]
+    print(tpairs)
+    
+    #if result is true - market is correct, if false - opposite market
+    check = lambda x: x in rates.keys()    
+    market_check = list(map(check,tpairs))
+    print(market_check)
+        
+    #convert market_check to buy/sell
+    convert = lambda x: 'sell' if x==True else 'buy'
+    trade_convert = list(map(convert,market_check))
+    print(trade_convert)
+    
+    #trade1
+    if trade_convert[0]=='buy':
+        reverse = tpairs[0][4:]+tpairs[0][:4]
+        # k.add_standard_order(reverse,'buy','market','20.00', oflags='viqc')
+    else:
+        # k.add_standard_order(tpairs[0],'sell','market','20.00')
+        pass
+    
+    #trade2 - get balance as input first
+    #trade2_vol = k.get_account_balance().json()['result'][high[1]]
+    if trade_convert[1]=='buy':
+        reverse = tpairs[1][4:]+tpairs[1][:4]
+        # k.add_standard_order(reverse,'buy','market',trade2_vol, oflags='viqc')
+    else:
+        # k.add_standard_order(tpairs[1],'sell','market',trade2_vol)
+        pass    
+    
+    #trade3 - get balance as input first
+    #trade3_vol = k.get_account_balance().json()['result'][high[2]]
+    if trade_convert[2]=='buy':
+        reverse = tpairs[2][4:]+tpairs[2][:4]
+        # k.add_standard_order(reverse,'buy','market',trade3_vol, oflags='viqc')
+    else:
+        # k.add_standard_order(tpairs[2],'sell','market',trade3_vol)
+        pass    
     
     '''#export for analysis
     if perct > 4.5:
@@ -124,12 +180,15 @@ def arb(t1,r1,r2,r3):
     # 2 - if opposite in keys use 1/opposite
     # 3 - if neither of those passes it doesn't exist and set to 0    
     
+    #if your market is equal - trade will be a sale (need bid) with base price
+    #if your market is opposite - trade will be buy (need ask) with quote price    
+    
     #conversion 1 
     if r1 in rates.keys():
-        c1 = exch(capital,rates[r1])
+        c1 = exch(capital,rates[r1][1])
     elif (r1[4:]+r1[:4]) in rates.keys():
         r1 = r1[4:]+r1[:4]
-        c1 = exch(capital,(1/rates[r1]))
+        c1 = exch(capital,(1/rates[r1][0]))
     else:
         r1=0
         c1 = exch(capital,r1)
@@ -137,10 +196,10 @@ def arb(t1,r1,r2,r3):
     
     #second conversion
     if r2 in rates.keys():
-        c2 = exch(c1,rates[r2])
+        c2 = exch(c1,rates[r2][1])
     elif (r2[4:]+r2[:4]) in rates.keys():
         r2 = r2[4:]+r2[:4]        
-        c2 = exch(c1,(1/rates[r2]))
+        c2 = exch(c1,(1/rates[r2][0]))
     else:
         r2=0
         c2 = exch(c1,r2)
@@ -148,10 +207,10 @@ def arb(t1,r1,r2,r3):
     
     #third conversion
     if r3 in rates.keys():
-        capital = exch(c2,rates[r3])
+        capital = exch(c2,rates[r3][1])
     elif (r3[4:]+r3[:4]) in rates.keys():
         r3 = r3[4:]+r3[:4]        
-        capital = exch(c2,(1/rates[r3]))
+        capital = exch(c2,(1/rates[r3][0]))
     else:
         r3=0        
         capital = exch(c2,r3)  
@@ -170,13 +229,16 @@ def get_rates():
     #use keys from rates to pull in last execute price from ticker info
     #format - ask, bid, last trade price
     for i in rates:
-        rates[i] = float(ticker_info.json()['result'][i]['a'][0])
-    
-        
+        rates[i] = [float(ticker_info.json()['result'][i]['a'][0]),
+                  float(ticker_info.json()['result'][i]['b'][0])]
+            
 #run intialization and set up the universe of 3-way options
 universe = initialize()
 
-#execute
+#execute multi-run
 execute_algo2(run)
+
+#execute single run
+#execute_algo()
 
 print("Finished!")
