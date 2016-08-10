@@ -241,7 +241,7 @@ class Kraken(object):
         return requests.post(self.url+'/'+self.apiv+'/'+self.pp[1]+'/'+self.method['ql'], data=req, headers=headers)
     
     
-    def get_trade_volume(self, req={}):
+    def get_trade_volume(self, req={}, **kwargs):
         
         #optional inputs = pair(comma delimited), fee-info
         urlpath = '/'+self.apiv+'/'+self.pp[1]+'/'+self.method['gtv']
