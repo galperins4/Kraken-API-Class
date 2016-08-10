@@ -9,7 +9,7 @@ Created on Sun Aug  7 22:02:13 2016
 from Kraken import Kraken
 from itertools import permutations
 import time
-# import datetime
+import datetime
 
 # create object
 k = Kraken()
@@ -65,60 +65,12 @@ def run_sim():
     print('% gain or loss is: ', (perct))    
     
     #trade functionality
-    if perct>5:
+    if perct>10:
         print('go for it')
+        execute_trade(high)
     
-    
-    #example for opposite market - buy / quote price
-    #trade1= k.add_standard_order('XXBTZUSD','buy','market','20.00', oflags='viqc')
-    
-    #example for market - sell / base price
-    #trade2 = k.add_standard_order('XXBTZUSD','sell','market',balance)
-    
-    #balance = k.get_account_balance().json()['result']['XXBT']
-    
-    #get trade pairs to determine type of trade     
-    t1_pair = ''.join(high[0:2])
-    t2_pair = ''.join(high[1:])
-    t3_pair = ''.join(high[-1::-2])
-    tpairs = [t1_pair,t2_pair,t3_pair]
-    print(tpairs)
-    
-    #if result is true - market is correct, if false - opposite market
-    market_check = list(map(lambda x: x in rates.keys(),tpairs))
-    print(market_check)
-    #convert market_check to buy/sell
-    trade_convert = list(map(lambda x: 'sell' if x==True else 'buy',market_check))
-    print(trade_convert)
-    
-    #trade1
-    if trade_convert[0]=='buy':
-        reverse = tpairs[0][4:]+tpairs[0][:4]
-        # k.add_standard_order(reverse,'buy','market','20.00', oflags='viqc')
-    else:
-        # k.add_standard_order(tpairs[0],'sell','market','20.00')
-        pass
-    
-    #trade2 - get balance as input first
-    #trade2_vol = k.get_account_balance().json()['result'][high[1]]
-    if trade_convert[1]=='buy':
-        reverse = tpairs[1][4:]+tpairs[1][:4]
-        # k.add_standard_order(reverse,'buy','market',trade2_vol, oflags='viqc')
-    else:
-        # k.add_standard_order(tpairs[1],'sell','market',trade2_vol)
-        pass    
-    
-    #trade3 - get balance as input first
-    #trade3_vol = k.get_account_balance().json()['result'][high[2]]
-    if trade_convert[2]=='buy':
-        reverse = tpairs[2][4:]+tpairs[2][:4]
-        # k.add_standard_order(reverse,'buy','market',trade3_vol, oflags='viqc')
-    else:
-        # k.add_standard_order(tpairs[2],'sell','market',trade3_vol)
-        pass    
-    
-    '''#export for analysis
-    if perct > 4.5:
+    #export for analysis
+    if perct > 2:
         time = str(datetime.datetime.now())
         file = open('track.txt','a')
         file.write(str(high))
@@ -128,8 +80,59 @@ def run_sim():
         file.write(time)
         file.write('\n')
         file.close()    
-        '''
+        
     
+def execute_trade(arb):
+    #example for opposite market - buy / quote price
+    #trade1= k.add_standard_order('XXBTZUSD','buy','market','20.00', oflags='viqc')
+    
+    #example for market - sell / base price
+    #trade2 = k.add_standard_order('XXBTZUSD','sell','market',balance)
+    
+    #get trade pairs to determine type of trade     
+    t1_pair = ''.join(arb[0:2])
+    t2_pair = ''.join(arb[1:])
+    t3_pair = ''.join(arb[-1::-2])
+    tpairs = [t1_pair,t2_pair,t3_pair]
+    print(tpairs)
+    
+    #if result is true - market is correct, if false - opposite market
+    market_check = list(map(lambda x: x in rates.keys(),tpairs))
+    print(market_check)
+    
+    #convert market_check to buy/sell
+    trade_convert = list(map(lambda x: 'sell' if x==True else 'buy',market_check))
+    print(trade_convert)
+    
+    #trade1
+    if trade_convert[0]=='buy':
+        reverse = tpairs[0][4:]+tpairs[0][:4]
+        # trade1 = k.add_standard_order(reverse,'buy','market','20.00', oflags='viqc')
+    else:
+        # trade1 = k.add_standard_order(tpairs[0],'sell','market','20.00')
+        pass
+    
+    #trade2 - get balance as input first
+    #trade2_vol = k.get_account_balance().json()['result'][arb[1]]
+    if trade_convert[1]=='buy':
+        reverse = tpairs[1][4:]+tpairs[1][:4]
+        # trade2 = k.add_standard_order(reverse,'buy','market',trade2_vol, oflags='viqc')
+    else:
+        # trade2 = k.add_standard_order(tpairs[1],'sell','market',trade2_vol)
+        pass    
+    
+    #trade3 - get balance as input first
+    #trade3_vol = k.get_account_balance().json()['result'][arb[2]]
+    if trade_convert[2]=='buy':
+        reverse = tpairs[2][4:]+tpairs[2][:4]
+        # trade3 = k.add_standard_order(reverse,'buy','market',trade3_vol, oflags='viqc')
+    else:
+        # trade3 = k.add_standard_order(tpairs[2],'sell','market',trade3_vol)
+        pass    
+    
+    print(trade1.json())
+    print(trade2.json())
+    print(trade3.json())
     
 def initialize():
     #unique combinations - groups of 3
