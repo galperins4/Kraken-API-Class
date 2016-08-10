@@ -43,19 +43,11 @@ def execute_algo2(t):
         run_sim()
  
         #pause 15 seconds between API calls for loop
-        time.sleep(10)        
+        time.sleep(3)        
         
         #increment counter
         t += 1
     
-        '''# on last run, ask if user wants to continue executing loop
-        if t == 100:
-            repeat = input('Would you like to continue(Y or N)').lower()
-            if repeat == 'y':
-                # start while incrementent over and clear output
-                t = 0
-                clear_output()'''
-
                 
 def run_sim():
     #get rates
@@ -93,13 +85,10 @@ def run_sim():
     print(tpairs)
     
     #if result is true - market is correct, if false - opposite market
-    check = lambda x: x in rates.keys()    
-    market_check = list(map(check,tpairs))
+    market_check = list(map(lambda x: x in rates.keys(),tpairs))
     print(market_check)
-        
     #convert market_check to buy/sell
-    convert = lambda x: 'sell' if x==True else 'buy'
-    trade_convert = list(map(convert,market_check))
+    trade_convert = list(map(lambda x: 'sell' if x==True else 'buy',market_check))
     print(trade_convert)
     
     #trade1
